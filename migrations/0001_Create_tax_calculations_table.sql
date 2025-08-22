@@ -11,7 +11,6 @@ CREATE TABLE tax_calculations (
   calculation_method TEXT, -- 'income_based' or 'direct_entry'
   allocations TEXT, -- JSON string of budget allocations
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  ip_address TEXT,
   user_agent TEXT
 );
 
