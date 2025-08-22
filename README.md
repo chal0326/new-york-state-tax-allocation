@@ -64,7 +64,6 @@ tax_calculations (
   calculation_method TEXT,
   allocations TEXT, -- JSON
   created_at DATETIME,
-  ip_address TEXT,
   user_agent TEXT
 )
 ```
