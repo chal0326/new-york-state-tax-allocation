@@ -5,7 +5,43 @@ import { Calculator, DollarSign, PieChart, Info, FileText, Users, Heart, Graduat
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "New York State Tax Allocation Tool" },
-    { name: "description", content: "Discover exactly where your New York State tax dollars go." },
+    { name: "description", content: "Discover exactly where your New York State tax dollars go. Calculate your NY State tax and see detailed breakdowns of how your money funds education, healthcare, infrastructure, and other vital services." },
+    
+    // OpenGraph meta tags
+    { property: "og:title", content: "New York State Tax Allocation Tool" },
+    { property: "og:description", content: "Discover exactly where your New York State tax dollars go. Calculate your NY State tax and see detailed breakdowns of how your money funds education, healthcare, infrastructure, and other vital services." },
+    { property: "og:type", content: "website" },
+    { property: "og:image", content: "/AllocationShot.png" },
+    { property: "og:image:width", content: "1200" },
+    { property: "og:image:height", content: "630" },
+    { property: "og:image:alt", content: "New York State Tax Allocation Tool - See where your tax dollars go" },
+    { property: "og:site_name", content: "New York State Tax Allocation Tool" },
+    { property: "og:locale", content: "en_US" },
+    
+    // Twitter Card meta tags
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:site", content: "@NewYorkState" },
+    { name: "twitter:title", content: "New York State Tax Allocation Tool" },
+    { name: "twitter:description", content: "Discover exactly where your New York State tax dollars go. Calculate your NY State tax and see detailed breakdowns." },
+    { name: "twitter:image", content: "/AllocationShot.png" },
+    { name: "twitter:image:alt", content: "New York State Tax Allocation Tool - See where your tax dollars go" },
+    
+    // Additional meta tags
+    { name: "author", content: "Cody Hall" },
+    { name: "keywords", content: "New York State, tax allocation, budget, government spending, civic engagement, tax calculator, NY State budget" },
+    { name: "robots", content: "index, follow" },
+    { name: "viewport", content: "width=device-width, initial-scale=1.0" },
+    { name: "theme-color", content: "#1e40af" },
+    
+    // Favicon and app icons
+    { rel: "icon", href: "/favicon.ico" },
+    { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
+    { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16x16.png" },
+    { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
+    { rel: "manifest", href: "/site.webmanifest" },
+    
+    
+    { rel: "canonical", href: "https://new-york-state-tax-allocation.nyc.workers.dev/" }
   ];
 }
 
@@ -18,6 +54,7 @@ export default function TaxAllocation() {
   const [showResults, setShowResults] = useState(false);
   const [allocations, setAllocations] = useState({});
   const [estimatedTax, setEstimatedTax] = useState(0);
+  const [showScrollHint, setShowScrollHint] = useState(false);
 
   // Based on the FY 2026 Enacted Budget data from OpenBudget.NY.Gov
   const budgetAllocations = {
@@ -191,6 +228,20 @@ export default function TaxAllocation() {
 
     setAllocations(newAllocations);
     setShowResults(true);
+
+    // Show scroll hint briefly, then auto-scroll to results
+    setShowScrollHint(true);
+    setTimeout(() => {
+      setShowScrollHint(false);
+      const resultsElement = document.getElementById('results-section');
+      if (resultsElement) {
+        resultsElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      }
+    }, 1500); // Show hint for 1.5 seconds before scrolling
 
     // Save calculation to D1 database
     try {
@@ -382,9 +433,21 @@ export default function TaxAllocation() {
         )}
       </div>
 
+      {/* Scroll Hint */}
+      {showScrollHint && (
+        <div className="text-center py-4 animate-bounce">
+          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+            <span>📊 Results calculated! Scroll down to see your tax breakdown</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </div>
+        </div>
+      )}
+
       {/* Results Section */}
       {showResults && Object.keys(allocations).length > 0 && (
-        <div className="space-y-8">
+        <div id="results-section" className="space-y-8">
           <div className="bg-green-50 p-6 rounded-lg">
             <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-black">
               <PieChart className="h-6 w-6" />
@@ -451,31 +514,93 @@ export default function TaxAllocation() {
             </div>
           )}
 
-          {/* Context Section */}
-          <div className="bg-gray-50 p-6 rounded-lg">
-            <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2 text-black">
-              <Info className="h-6 w-6" />
-              Understanding Your Impact
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-semibold mb-2 text-black">Budget Context</h3>
-                <ul className="space-y-2 text-sm text-gray-800">
-                  <li>• NY State collected over $147 billion in fiscal year 2024</li>
-                  <li>• Your {formatCurrency(estimatedTax)} represents {((estimatedTax / getTotalStateRevenue()) * 100).toExponential(2)}% of total revenue</li>
-                  <li>• The FY 2026 budget is approximately $254 billion</li>
-                  <li>• 80% of state operating funds come from taxes</li>
-                </ul>
+          {/* Understanding Your Impact - Enhanced */}
+          <div className="bg-gradient-to-br from-blue-900 to-blue-700 text-white p-8 rounded-xl shadow-lg">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-3 flex items-center justify-center gap-3">
+                <Info className="h-8 w-8 text-blue-200" />
+                Understanding Your Impact
+              </h2>
+              <p className="text-blue-100 text-lg max-w-2xl mx-auto">
+                Every tax dollar you contribute helps build a stronger New York State. Here's the bigger picture of your civic participation.
+              </p>
+            </div>
+
+            {/* Key Stats Cards */}
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center border border-white/20">
+                <div className="text-3xl font-bold text-blue-200 mb-2">$147B</div>
+                <div className="text-sm font-medium text-blue-100 mb-1">Total State Revenue</div>
+                <div className="text-xs text-blue-200">Fiscal Year 2024</div>
               </div>
-              <div>
-                <h3 className="font-semibold mb-2 text-black">Top Spending Areas</h3>
-                <ul className="space-y-2 text-sm text-gray-800">
-                  <li>• Education & School Aid: 29% of budget</li>
-                  <li>• Health & Medicaid: 27% of budget</li>
-                  <li>• Higher Education: 9% of budget</li>
-                  <li>• Mental Health Services: 8% of budget</li>
-                </ul>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center border border-white/20">
+                <div className="text-3xl font-bold text-green-300 mb-2">{formatCurrency(estimatedTax)}</div>
+                <div className="text-sm font-medium text-blue-100 mb-1">Your Contribution</div>
+                <div className="text-xs text-blue-200">
+                  {(() => {
+                    const percentage = (estimatedTax / getTotalStateRevenue()) * 100;
+                    if (percentage < 0.01) {
+                      return 'Less than 0.01%';
+                    }
+                    return percentage.toFixed(4) + '%';
+                  })()} of total revenue
+                </div>
               </div>
+              
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 text-center border border-white/20">
+                <div className="text-3xl font-bold text-blue-200 mb-2">$254B</div>
+                <div className="text-sm font-medium text-blue-100 mb-1">FY 2026 Budget</div>
+                <div className="text-xs text-blue-200">80% funded by taxes</div>
+              </div>
+            </div>
+
+            {/* Budget Priorities */}
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+              <h3 className="text-xl font-semibold mb-4 text-center text-blue-100">New York's Budget Priorities</h3>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="bg-green-500/20 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                    <GraduationCap className="h-8 w-8 text-green-300" />
+                  </div>
+                  <div className="text-2xl font-bold text-green-300">29%</div>
+                  <div className="text-sm text-blue-100">Education & School Aid</div>
+                </div>
+                
+                <div className="text-center">
+                  <div className="bg-red-500/20 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                    <Heart className="h-8 w-8 text-red-300" />
+                  </div>
+                  <div className="text-2xl font-bold text-red-300">27%</div>
+                  <div className="text-sm text-blue-100">Health & Medicaid</div>
+                </div>
+                
+                <div className="text-center">
+                  <div className="bg-purple-500/20 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                    <GraduationCap className="h-8 w-8 text-purple-300" />
+                  </div>
+                  <div className="text-2xl font-bold text-purple-300">9%</div>
+                  <div className="text-sm text-blue-100">Higher Education</div>
+                </div>
+                
+                <div className="text-center">
+                  <div className="bg-yellow-500/20 rounded-full w-16 h-16 mx-auto mb-3 flex items-center justify-center">
+                    <Heart className="h-8 w-8 text-yellow-300" />
+                  </div>
+                  <div className="text-2xl font-bold text-yellow-300">8%</div>
+                  <div className="text-sm text-blue-100">Mental Health</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Call to Action */}
+            <div className="text-center mt-8 bg-white/5 rounded-lg p-6 border border-white/10">
+              <p className="text-blue-100 mb-2">
+                <strong className="text-white">Your voice matters!</strong> Understanding how your taxes are used is the first step in civic engagement.
+              </p>
+              <p className="text-sm text-blue-200">
+                Stay informed about New York State's budget and participate in the democratic process that shapes these allocations.
+              </p>
             </div>
           </div>
 
