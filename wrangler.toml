@@ -1,0 +1,22 @@
+name = "new-york-state-tax-allocation"
+main = "./workers/app.ts"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+upload_source_maps = true
+
+[observability]
+enabled = true
+
+[vars]
+VALUE_FROM_CLOUDFLARE = "Made by Cody Hall"
+
+[[kv_namespaces]]
+binding = "TAX_DATA"
+id = "b045e0d5bffe413d95105e62cf82ea90"
+
+[[d1_databases]]
+binding = "TAX_DB"
+database_name = "tax-allocation-db"
+database_id = "19a81559-441a-4432-9b05-1a7a392d9ff5"
+migrations_dir = "migrations"
+

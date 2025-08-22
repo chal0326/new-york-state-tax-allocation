@@ -1,109 +1,164 @@
-# Welcome to React Router + Cloudflare Workers!
+# New York State Tax Allocation Tool
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/react-router-starter-template)
+A web application that helps New York State taxpayers understand exactly where their tax dollars go by providing detailed breakdowns of state budget allocations based on their individual tax contributions.
 
-![React Router Starter Template Preview](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/bfdc2f85-e5c9-4c92-128b-3a6711249800/public)
+## About
 
-<!-- dash-content-start -->
-
-A modern, production-ready template for building full-stack React applications using [React Router](https://reactrouter.com/) and the [Cloudflare Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/).
+This tool allows users to:
+- Calculate their NY State tax liability from income information
+- Enter their actual tax amount directly 
+- See a detailed breakdown of how their tax dollars are allocated across state programs
+- Understand the impact of their contribution to education, healthcare, infrastructure, and other vital services
 
 ## Features
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
-- 🔎 Built-in Observability to monitor your Worker
-<!-- dash-content-end -->
+### Tax Calculation
+- 🧮 **Complete NY State Tax Calculator** - All 5 filing statuses with accurate 2025 tax brackets
+- 💰 **Flexible Input Methods** - Calculate from income or enter tax amount directly
+- 📊 **Real-time Calculations** - Instant allocation breakdowns as you type
 
-## Getting Started
+### Budget Allocations
+- 🏫 **Education & School Aid** - See your contribution to K-12 schools, special education, and school construction
+- 🏥 **Healthcare & Medicaid** - Understand your support for hospitals, nursing homes, and mental health services
+- 🚧 **Infrastructure** - Track funding for highways, bridges, MTA, and transportation networks
+- 🛡️ **Public Safety** - View contributions to state police, courts, and emergency services
 
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
+### Data & Analytics
+- 📈 **Usage Tracking** - Anonymous analytics stored in Cloudflare D1 database
+- 🔍 **Data Sources** - Based on official NY State FY 2026 budget documents
+- 📋 **Tax Expenditures** - See how your taxes fund credits and exemptions for other New Yorkers
 
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/react-router-starter-template
+### Technical Features
+- 🚀 **Fast Global Deployment** - Built on Cloudflare Workers
+- 📱 **Responsive Design** - Works perfectly on all devices
+- ♿ **Accessible** - High contrast text and screen reader friendly
+- 🔒 **Privacy-First** - No personal data stored, only anonymous usage statistics
+
+## Supported Filing Statuses
+
+- **Single** - Standard individual filers
+- **Married Filing Jointly** - Married couples filing together  
+- **Married Filing Separately** - Married couples filing separate returns
+- **Head of Household** - Single parents and qualifying households
+- **Qualifying Widow(er)** - Recently widowed taxpayers with dependent children
+
+## Tax Types Supported
+
+- **Personal Income Tax** - Individual NY State income tax with complete allocation breakdown
+- **Corporate Tax** - Business tax allocations focused on economic development programs
+- **Sales Tax** - Consumer tax contributions including local government aid
+
+## Database Schema
+
+The application stores anonymous usage data in Cloudflare D1:
+
+```sql
+tax_calculations (
+  id INTEGER PRIMARY KEY,
+  session_id TEXT,
+  income REAL,
+  filing_status TEXT,
+  tax_type TEXT,
+  calculated_tax REAL,
+  tax_amount_entered REAL,
+  calculation_method TEXT,
+  allocations TEXT, -- JSON
+  created_at DATETIME,
+  ip_address TEXT,
+  user_agent TEXT
+)
 ```
 
-A live public deployment of this template is available at [https://react-router-starter-template.templates.workers.dev](https://react-router-starter-template.templates.workers.dev)
+## Development
+
+### Prerequisites
+
+- Node.js 18+
+- Cloudflare account (for deployment)
 
 ### Installation
 
-Install the dependencies:
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd new-york-state-tax-allocation
+```
 
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-### Development
+3. Set up Cloudflare D1 database:
+```bash
+npx wrangler d1 migrations apply tax-allocation-db --local
+npx wrangler d1 migrations apply tax-allocation-db --remote
+```
 
-Start the development server with HMR:
+### Local Development
 
+Start the development server:
 ```bash
 npm run dev
 ```
 
 Your application will be available at `http://localhost:5173`.
 
-## Typegen
+### Database Management
 
-Generate types for your Cloudflare bindings in `wrangler.json`:
-
-```sh
-npm run typegen
+Query local database:
+```bash
+npx wrangler d1 execute tax-allocation-db --command "SELECT COUNT(*) FROM tax_calculations"
 ```
 
-## Building for Production
-
-Create a production build:
-
+Query remote database:
 ```bash
-npm run build
-```
-
-## Previewing the Production Build
-
-Preview the production build locally:
-
-```bash
-npm run preview
+npx wrangler d1 execute tax-allocation-db --remote --command "SELECT COUNT(*) FROM tax_calculations"
 ```
 
 ## Deployment
 
-If you don't have a Cloudflare account, [create one here](https://dash.cloudflare.com/sign-up)! Go to your [Workers dashboard](https://dash.cloudflare.com/?to=%2F%3Aaccount%2Fworkers-and-pages) to see your [free custom Cloudflare Workers subdomain](https://developers.cloudflare.com/workers/configuration/routing/workers-dev/) on `*.workers.dev`.
+### Build for Production
 
-Once that's done, you can build your app:
-
-```sh
+```bash
 npm run build
 ```
 
-And deploy it:
+### Deploy to Cloudflare Workers
 
-```sh
+```bash
 npm run deploy
 ```
 
-To deploy a preview URL:
+### Environment Configuration
 
-```sh
-npx wrangler versions upload
-```
+The application uses these Cloudflare bindings:
+- `TAX_DB` - D1 database for analytics
+- `TAX_DATA` - KV namespace for caching (optional)
 
-You can then promote a version to production after verification or roll it out progressively.
+## Data Sources
 
-```sh
-npx wrangler versions deploy
-```
+This tool uses official data from:
+- NY State FY 2026 Enacted Budget
+- OpenBudget.NY.Gov
+- NY State Department of Taxation and Finance
+- NY State Tax Expenditure Report FY 2026
 
-## Styling
+## Contributing
 
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
+This project provides transparency into New York State government spending. Contributions that improve accuracy, accessibility, or user experience are welcome.
+
+### Code Style
+
+- TypeScript for type safety
+- Tailwind CSS for styling  
+- ESLint + Prettier for code formatting
+- React Router 7 for routing
+
+## License
+
+MIT License - Built to serve New York State taxpayers
 
 ---
 
-Built with ❤️ using React Router.
+Made with ❤️ by Cody Hall
